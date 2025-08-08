@@ -1,11 +1,11 @@
 import getStarshipData from "./services/starshipService.js";
 import { useState, useEffect } from "react";
 import StarshipList from "./components/StarshipList/StarshipList.jsx";
+import StarshipSearch from "./components/StarshipSearch/StarshipSearch.jsx";
 import "./App.css";
 
 const App = () => {
   const [starshipData, setStarshipData] = useState(null);
-  // this will change what user sees based on search:
   const [displayStarships, setDisplayStarships] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -15,7 +15,6 @@ const App = () => {
       try {
         setLoading(true);
         const result = await getStarshipData();
-        // axios returns data in the .data property
         setStarshipData(result.data);
         setDisplayStarships(result.data);
         setLoading(false);
@@ -28,7 +27,17 @@ const App = () => {
     fetchData();
   }, []);
 
-  console.log("starshipData is:", starshipData);
+  const search = (formData) => {
+    const filteredShips = starshipData.filter((ship) =>
+      ship.name.toLowerCase().includes(formData.toLowerCase())
+    );
+    setDisplayStarships(filteredShips);
+  };
+
+  const resetSearch = () => {
+    console.log("Resetting the search results to show all starships");
+    setDisplayStarships(starshipData);
+  };
 
   if (loading) return <h1>Loading starships...</h1>;
 
@@ -36,6 +45,7 @@ const App = () => {
     <div>
       <h1>Star Wars Starships</h1>
       {error && <p>Error: {error}</p>}
+      <StarshipSearch search={search} starships={displayStarships} resetSearch={resetSearch} />
       {starshipData && <StarshipList starships={displayStarships} />}
     </div>
   );
